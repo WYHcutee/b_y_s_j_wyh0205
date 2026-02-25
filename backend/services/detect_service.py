@@ -29,7 +29,7 @@ def detect_website(url):
         model_text = response["choices"][0]["message"]["content"]
 
         # 4️⃣ 三分支评分
-        url_score, text_score, image_score = parse_model_output(model_text)
+        url_score, text_score, image_score,reason = parse_model_output(model_text)
 
         # 5️⃣ 融合
         final_score = weighted_fusion(url_score, text_score, image_score)
@@ -37,12 +37,15 @@ def detect_website(url):
         # 6️⃣ 风险等级判定
         risk_level = classify_risk(final_score)
 
+        print(f"[DEBUG] final_score: {final_score}")
+
         return {
             "url_analysis": {"score": url_score},
             "text_analysis": {"score": text_score},
             "image_analysis": {"score": image_score},
             "final_score": final_score,
-            "risk_level": risk_level
+            "risk_level": risk_level,
+            "reason": reason
         }
 
     except Exception as e:

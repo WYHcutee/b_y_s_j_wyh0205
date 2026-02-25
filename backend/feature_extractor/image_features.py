@@ -1,19 +1,43 @@
-from backend.utils.screenshot import capture_screenshot
+import base64
+import logging
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+
+logger = logging.getLogger(__name__)
+
 
 def extract_image_features(url):
     """
-    提取网页截图特征（容错版本）
-    即使截图失败，也不会影响整体系统
+    使用 Selenium + 本地 Chrome 截取网页全屏截图，返回 base64 编码的图片
     """
+    image_base64 = ""
+    driver = None
     try:
-        image_base64 = capture_screenshot(url)
+        # 配置 Chrome 无头模式
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # 无头模式（不显示浏览器窗口）
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--window-size=1920,1080")
 
-        if image_base64 is None:
-            print("[WARN] 截图返回 None，使用空图像")
-            return {"image_base64": None}
+        driver_path = r"F:\1111AAA毕业设计\基于多模态大模型的恶意网站检测系统\drivers\chromedriver.exe"
+        service = Service(executable_path=driver_path)
 
-        return {"image_base64": image_base64}
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver.set_page_load_timeout(30)  # 增加到30秒
+        driver.implicitly_wait(10)  # 隐式等待10秒，定位元素时也等待
+
+        screenshot_bytes = driver.get_screenshot_as_png()
+        image_base64 = base64.b64encode(screenshot_bytes).decode('utf-8')
+
+        logger.info(f"Selenium 截图成功，base64 长度: {len(image_base64)}")
 
     except Exception as e:
-        print(f"[ERROR] 图像特征提取失败: {e}")
-        return {"image_base64": None}
+        logger.error(f"Selenium 截图失败: {e}")
+        image_base64 = ""  # 失败时返回空字符串，上层会走 mock 数据
+    finally:
+        if driver:
+            driver.quit()
+
+    return {"image_base64": image_base64}

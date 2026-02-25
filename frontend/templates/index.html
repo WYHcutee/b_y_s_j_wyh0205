@@ -29,6 +29,26 @@
         #floatingBall:hover {
             transform: scale(1.1);
         }
+
+        /* 为了让仪表盘好看，加一点简单样式 */
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+        .risk-text {
+            font-size: 1.5rem;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -64,11 +84,31 @@
             </div>
             <div id="loading" class="loading" style="display:none;">模型推理中...</div>
             <div id="resultSection" style="display:none;">
-                <!-- 仪表盘 -->
-                <div class="dashboard glass">
-                    <canvas id="gaugeChart"></canvas>
-                    <div id="riskLevel" class="risk-text"></div>
-                </div>
+
+                <div id="analysisReason" class="glass" style="margin-top: 20px; padding: 15px;">
+    <h4>详细分析</h4>
+    <p id="reasonText"></p>
+</div>
+
+                <!-- 在三个卡片的后面，雷达图之前添加 -->
+<div id="riskReport" class="glass" style="margin-top: 20px; padding: 20px;">
+    <h3 style="margin-top: 0; color: #a5b4fc;">详细风险报告</h3>
+    <div id="reportContent" style="line-height: 1.6; color: #e5e7eb; white-space: pre-wrap;"></div>
+</div>
+
+<div class="dashboard glass">
+    <div class="gauge-container" style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
+        <svg width="200" height="200" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="54" fill="none" stroke="#2d3748" stroke-width="12" />
+            <circle id="gaugeProgress" cx="60" cy="60" r="54" fill="none" stroke="#22c55e" stroke-width="12" stroke-linecap="round" stroke-dasharray="339.292" stroke-dashoffset="339.292" transform="rotate(-90 60 60)" style="transition: stroke-dashoffset 0.5s;"/>
+            <!-- 将原来的 text 和 tspan 注释掉，避免干扰 -->
+            <!-- <text x="60" y="60" text-anchor="middle" dy="0.3em" font-size="20" fill="#fff">0</text> -->
+        </svg>
+        <!-- 新增一个绝对定位的 div 用于显示分数 -->
+        <div id="scoreDisplay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; font-weight: bold; color: white; text-shadow: 0 0 10px rgba(0,0,0,0.5);">0</div>
+    </div>
+    <div id="riskLevel" class="risk-text"></div>
+</div>
                 <!-- 三模态卡片 -->
                 <div class="cards">
                     <div class="card glass">
@@ -84,12 +124,36 @@
                         <div id="imageResult"></div>
                     </div>
                 </div>
+                <!-- 详细解释区域（可选） -->
+                <div class="explain-card glass" id="explainBox" style="display:none;">
+                    <p id="explainText"></p>
+                </div>
+                <button onclick="toggleExplain()" class="explain-btn">查看详细分析</button>
+                <!-- 雷达图（可选） -->
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
             </div>
         </div>
 
-        <div id="history" class="page" style="display:none;"></div>
-        <div id="experiment" class="page" style="display:none;"></div>
-        <div id="about" class="page" style="display:none;"></div>
+        <!-- 其他页面（历史、实验、关于）保持不变 -->
+        <div id="history" class="page" style="display:none;">
+            <h2>检测历史</h2>
+            <table id="historyTable" border="1" cellpadding="5" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr><th>URL</th><th>得分</th><th>等级</th><th>时间</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div id="experiment" class="page" style="display:none;">
+            <h2>实验评估对比</h2>
+            <canvas id="experimentChart"></canvas>
+        </div>
+        <div id="about" class="page" style="display:none;">
+            <h2>系统说明</h2>
+            <p>基于多模态大模型的恶意网站检测系统，综合利用URL、文本、图像信息进行风险评估。</p>
+        </div>
     </main>
 </div>
 
