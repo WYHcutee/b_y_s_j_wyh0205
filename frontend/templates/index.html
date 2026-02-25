@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>多模态恶意网站检测控制台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 悬浮球样式 */
+        #floatingBall {
+            position: absolute; /* 可拖拽 */
+            bottom: 50px;
+            right: 50px;
+            width: 60px;
+            height: 60px;
+            background: #2563eb;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 9999;
+            transition: transform 0.2s;
+        }
+
+        #floatingBall:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <!-- 左侧菜单 -->
+    <aside class="sidebar">
+        <div class="logo">🛡 安全检测控制台</div>
+        <ul>
+            <li onclick="showPage('home')" class="active">首页检测</li>
+            <li onclick="showPage('history')">检测记录</li>
+            <li onclick="showPage('experiment')">实验评估</li>
+            <li onclick="showPage('about')">系统说明</li>
+        </ul>
+    </aside>
+
+    <!-- 主区域 -->
+    <main class="main">
+        <!-- 顶部状态栏 -->
+        <div class="topbar">
+            <div>系统状态：<span class="online">● 在线</span></div>
+            <div>模型版本：DeepSeek</div>
+        </div>
+
+        <!-- 首页 -->
+        <div id="home" class="page">
+            <div class="search-card glass">
+                <h2>网站安全检测</h2>
+                <div class="search-box">
+                    <input type="text" id="urlInput" placeholder="请输入需要检测的网址">
+                    <button onclick="detect()">开始检测</button>
+                </div>
+            </div>
+            <div id="loading" class="loading" style="display:none;">模型推理中...</div>
+            <div id="resultSection" style="display:none;">
+                <!-- 仪表盘 -->
+                <div class="dashboard glass">
+                    <canvas id="gaugeChart"></canvas>
+                    <div id="riskLevel" class="risk-text"></div>
+                </div>
+                <!-- 三模态卡片 -->
+                <div class="cards">
+                    <div class="card glass">
+                        <h3>URL 分析</h3>
+                        <div id="urlResult"></div>
+                    </div>
+                    <div class="card glass">
+                        <h3>文本分析</h3>
+                        <div id="textResult"></div>
+                    </div>
+                    <div class="card glass">
+                        <h3>图像分析</h3>
+                        <div id="imageResult"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="history" class="page" style="display:none;"></div>
+        <div id="experiment" class="page" style="display:none;"></div>
+        <div id="about" class="page" style="display:none;"></div>
+    </main>
+</div>
+
+<!-- 悬浮球 -->
+<div id="floatingBall">🛡</div>
+
+<script src="{{ url_for('static', filename='js/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+    // 点击悬浮球触发 detect()
+    const ball = document.getElementById('floatingBall');
+    ball.addEventListener('click', () => {
+        detect();
+    });
+
+    // 拖拽功能
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    ball.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - ball.offsetLeft;
+        offsetY = e.clientY - ball.offsetTop;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        ball.style.left = (e.clientX - offsetX) + "px";
+        ball.style.top = (e.clientY - offsetY) + "px";
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+</script>
+
+</body>
+</html>

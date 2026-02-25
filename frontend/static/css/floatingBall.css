@@ -1,0 +1,59 @@
+#floatingBall {
+    position: absolute;
+    bottom: 50px;
+    right: 50px;
+    width: 60px;
+    height: 60px;
+    background: #2563eb;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 9999;
+    transition: transform 0.2s;
+}
+
+#floatingBall:hover {
+    transform: scale(1.1);
+}
+
+/* 小面板 */
+#floatingPanel {
+    position: absolute;
+    bottom: 120px; /* 悬浮球上方 */
+    right: 50px;
+    width: 250px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    color: white;
+    display: none; /* 默认隐藏 */
+    z-index: 9998;
+}
+
+#floatingPanel input {
+    width: calc(100% - 20px);
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+#floatingPanel button {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    background: #22c55e;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
