@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>多模态恶意网站检测控制台</title>
+    <!-- 使用国内稳定 CDN -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* 悬浮球样式 */
         #floatingBall {
-            position: absolute; /* 可拖拽 */
+            position: absolute;
             bottom: 50px;
             right: 50px;
             width: 60px;
@@ -25,38 +27,154 @@
             z-index: 9999;
             transition: transform 0.2s;
         }
-
         #floatingBall:hover {
             transform: scale(1.1);
         }
-
-        /* 为了让仪表盘好看，加一点简单样式 */
-        .dashboard {
+        /* 离线状态颜色 */
+        .offline {
+            color: #ef4444 !important;
+        }
+        /* 模式切换按钮样式 */
+        .mode-selector {
             display: flex;
-            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .mode-btn {
+            background: rgba(30, 40, 60, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            color: #cbd5e1;
+            padding: 8px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .mode-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        /* 图片上传区域 */
+        .image-upload-area {
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            background: rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .image-upload-area:hover {
+            border-color: #3b82f6;
+            background: rgba(59,130,246,0.1);
+        }
+        .image-upload-area i {
+            font-size: 2rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 10px;
+            display: none;
+        }
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        /* ===== 欢迎遮罩层样式 ===== */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 15, 30, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 20000;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            transition: opacity 0.3s ease;
         }
-        .gauge-container {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            margin: 0 auto;
-        }
-        .risk-text {
-            font-size: 1.5rem;
-            margin-top: 10px;
+
+        .welcome-card {
+            max-width: 500px;
+            width: 90%;
             text-align: center;
+            padding: 40px;
+            background: rgba(30, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .welcome-card h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(120deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-card p {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .enter-btn {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none;
+            border-radius: 60px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            padding: 14px 40px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.5);
+            transition: all 0.2s;
+            border: none;
+            outline: none;
+        }
+
+        .enter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -5px #2563eb;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
         }
     </style>
 </head>
 <body>
 
+<!-- ===== 欢迎遮罩层 ===== -->
+<div id="welcome-overlay" class="welcome-overlay">
+    <div class="welcome-card glass">
+        <h2>欢迎使用恶意网站检测系统</h2>
+        <p>基于多模态大模型的智能安全分析工具</p>
+        <button id="enter-system-btn" class="enter-btn">进入系统</button>
+    </div>
+</div>
+
 <div class="layout">
     <!-- 左侧菜单 -->
     <aside class="sidebar">
-        <div class="logo">🛡 安全检测控制台</div>
+        <div class="logo">
+            <i class="fas fa-shield"></i> 安全检测控制台
+        </div>
         <ul>
             <li onclick="showPage('home')" class="active">首页检测</li>
             <li onclick="showPage('history')">检测记录</li>
@@ -69,46 +187,62 @@
     <main class="main">
         <!-- 顶部状态栏 -->
         <div class="topbar">
-            <div>系统状态：<span class="online">● 在线</span></div>
-            <div>模型版本：DeepSeek</div>
+    <div>系统状态：<span id="connectionStatus" class="online">● 在线</span></div>
+    <div class="model-selector-wrapper">
+        <span>模型版本：</span>
+        <div class="custom-dropdown">
+            <button class="dropdown-button">智谱 (GLM-4V-Flash)</button>
         </div>
-
+    </div>
+</div>
         <!-- 首页 -->
         <div id="home" class="page">
             <div class="search-card glass">
                 <h2>网站安全检测</h2>
-                <div class="search-box">
-                    <input type="text" id="urlInput" placeholder="请输入需要检测的网址">
-                    <button onclick="detect()">开始检测</button>
+                <!-- 模式切换按钮 -->
+                <div class="mode-selector">
+                    <span class="mode-btn active" data-mode="url" onclick="switchMode('url')">URL</span>
+                    <span class="mode-btn" data-mode="text" onclick="switchMode('text')">文本</span>
+                    <span class="mode-btn" data-mode="image" onclick="switchMode('image')">图片</span>
                 </div>
+                <!-- URL 输入区域（默认显示） -->
+<div id="url-input-area" class="search-box" style="display: flex; align-items: center;">
+    <input type="text" id="urlInput" placeholder="请输入需要检测的网址" style="flex: 1;">
+    <button class="clear-input-btn" data-target="urlInput" title="清空">✕</button>
+</div>
+                <!-- 文本输入区域（初始隐藏） -->
+                <div id="text-input-area" style="display: none;">
+    <div style="display: flex; align-items: flex-start; gap: 8px;">
+        <textarea id="textInput" rows="5" placeholder="请输入或粘贴网页文本内容..." style="flex: 1;"></textarea>
+        <button class="clear-input-btn" data-target="textInput" title="清空">✕</button>
+    </div>
+</div>
+                <!-- 图片输入区域（初始隐藏） -->
+                <div id="image-input-area" style="display: none;">
+    <div class="image-upload-area" id="dropArea">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>点击上传或拖拽图片到这里</p>
+        <p style="font-size:0.8rem; color:#94a3b8;">支持粘贴截图 (Ctrl+V)</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    </div>
+    <img id="imagePreview" class="image-preview" alt="预览">
+    <button class="clear-image-btn" style="margin-top: 10px; display: none;">清除图片</button>
+</div>
+                <button onclick="detect()" class="detect-btn">开始检测</button>
             </div>
             <div id="loading" class="loading" style="display:none;">模型推理中...</div>
             <div id="resultSection" style="display:none;">
-
-                <div id="analysisReason" class="glass" style="margin-top: 20px; padding: 15px;">
-    <h4>详细分析</h4>
-    <p id="reasonText"></p>
-</div>
-
-                <!-- 在三个卡片的后面，雷达图之前添加 -->
-<div id="riskReport" class="glass" style="margin-top: 20px; padding: 20px;">
-    <h3 style="margin-top: 0; color: #a5b4fc;">详细风险报告</h3>
-    <div id="reportContent" style="line-height: 1.6; color: #e5e7eb; white-space: pre-wrap;"></div>
-</div>
-
-<div class="dashboard glass">
-    <div class="gauge-container" style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
-        <svg width="200" height="200" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="54" fill="none" stroke="#2d3748" stroke-width="12" />
-            <circle id="gaugeProgress" cx="60" cy="60" r="54" fill="none" stroke="#22c55e" stroke-width="12" stroke-linecap="round" stroke-dasharray="339.292" stroke-dashoffset="339.292" transform="rotate(-90 60 60)" style="transition: stroke-dashoffset 0.5s;"/>
-            <!-- 将原来的 text 和 tspan 注释掉，避免干扰 -->
-            <!-- <text x="60" y="60" text-anchor="middle" dy="0.3em" font-size="20" fill="#fff">0</text> -->
-        </svg>
-        <!-- 新增一个绝对定位的 div 用于显示分数 -->
-        <div id="scoreDisplay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; font-weight: bold; color: white; text-shadow: 0 0 10px rgba(0,0,0,0.5);">0</div>
-    </div>
-    <div id="riskLevel" class="risk-text"></div>
-</div>
+                <!-- 仪表盘（使用 SVG 圆环） -->
+                <div class="dashboard glass">
+                    <div class="gauge-container" style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
+                        <svg width="200" height="200" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#2d3748" stroke-width="12" />
+                            <circle id="gaugeProgress" cx="60" cy="60" r="54" fill="none" stroke="#22c55e" stroke-width="12" stroke-linecap="round" stroke-dasharray="339.292" stroke-dashoffset="339.292" transform="rotate(-90 60 60)" style="transition: stroke-dashoffset 0.5s;"/>
+                        </svg>
+                        <div id="scoreDisplay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; font-weight: bold; color: white; text-shadow: 0 0 10px rgba(0,0,0,0.5);">0</div>
+                    </div>
+                    <div id="riskLevel" class="risk-text"></div>
+                </div>
                 <!-- 三模态卡片 -->
                 <div class="cards">
                     <div class="card glass">
@@ -124,19 +258,19 @@
                         <div id="imageResult"></div>
                     </div>
                 </div>
-                <!-- 详细解释区域（可选） -->
-                <div class="explain-card glass" id="explainBox" style="display:none;">
-                    <p id="explainText"></p>
+                <!-- 风险报告区域 -->
+                <div id="riskReport" class="glass" style="margin-top: 20px; padding: 20px;">
+                    <h3 style="margin-top: 0; color: #a5b4fc;">详细风险报告</h3>
+                    <div id="reportContent" style="line-height: 1.6; color: #e5e7eb; white-space: pre-wrap;"></div>
                 </div>
-                <button onclick="toggleExplain()" class="explain-btn">查看详细分析</button>
-                <!-- 雷达图（可选） -->
+                <!-- 雷达图 -->
                 <div class="chart-container">
                     <canvas id="radarChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- 其他页面（历史、实验、关于）保持不变 -->
+        <!-- 其他页面保持不变 -->
         <div id="history" class="page" style="display:none;">
             <h2>检测历史</h2>
             <table id="historyTable" border="1" cellpadding="5" style="width:100%; border-collapse: collapse;">
@@ -152,43 +286,70 @@
         </div>
         <div id="about" class="page" style="display:none;">
             <h2>系统说明</h2>
-            <p>基于多模态大模型的恶意网站检测系统，综合利用URL、文本、图像信息进行风险评估。</p>
+            <p>基于多模态大模型的恶意网站检测系统，支持URL、文本、图片三种输入方式。</p>
         </div>
     </main>
 </div>
 
 <!-- 悬浮球 -->
-<div id="floatingBall">🛡</div>
+<div id="floatingBall">
+    <i class="fas fa-shield"></i>
+</div>
 
 <script src="{{ url_for('static', filename='js/api.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-    // 点击悬浮球触发 detect()
     const ball = document.getElementById('floatingBall');
-    ball.addEventListener('click', () => {
-        detect();
-    });
-
-    // 拖拽功能
-    let isDragging = false;
-    let offsetX, offsetY;
+    let startX, startY, startLeft, startTop;
+    let dragStarted = false;
+    const DRAG_THRESHOLD = 8;
 
     ball.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        offsetX = e.clientX - ball.offsetLeft;
-        offsetY = e.clientY - ball.offsetTop;
+        if (e.button !== 0) return;
+        e.preventDefault();
+        dragStarted = false;
+        const rect = ball.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        startX = e.clientX;
+        startY = e.clientY;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
     });
 
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        ball.style.left = (e.clientX - offsetX) + "px";
-        ball.style.top = (e.clientY - offsetY) + "px";
-    });
+    function onMouseMove(e) {
+        if (e.button !== 0) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (!dragStarted && (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD)) {
+            dragStarted = true;
+        }
+        if (dragStarted) {
+            ball.style.left = (startLeft + dx) + 'px';
+            ball.style.top = (startTop + dy) + 'px';
+            ball.style.bottom = 'auto';
+            ball.style.right = 'auto';
+            // 如果卡片打开，更新位置
+            if (window.floatingCard && window.floatingCard.style.display === 'block') {
+                window.positionCardNearBall();
+            }
+        }
+    }
 
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
+    function onMouseUp(e) {
+        if (e.button !== 0) return;
+        if (!dragStarted) {
+            // 视为点击，切换卡片
+            window.toggleFloatingCard();
+        }
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+
+    // 欢迎遮罩层点击进入按钮事件
+    document.getElementById('enter-system-btn').addEventListener('click', function() {
+        document.getElementById('welcome-overlay').style.display = 'none';
     });
 </script>
-
 </body>
 </html>

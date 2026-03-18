@@ -39,6 +39,14 @@ body {
     gap: 8px;
 }
 
+/* 图标样式（确保显示） */
+.logo i {
+    color: #3b82f6;
+    margin-right: 8px;
+    font-size: 1.5rem;
+    vertical-align: middle;
+}
+
 .sidebar ul {
     list-style: none;
     padding: 0;
@@ -94,6 +102,11 @@ body {
     margin-left: 4px;
 }
 
+/* 离线状态颜色 */
+.offline {
+    color: #ef4444 !important;
+}
+
 /* ===== 玻璃效果增强 ===== */
 .glass {
     background: rgba(20, 25, 45, 0.6);
@@ -111,6 +124,7 @@ body {
     max-width: 700px;
     margin: 0 auto 20px;
     text-align: center;
+    z-index: 1 !important;
 }
 
 .search-card h2 {
@@ -124,7 +138,7 @@ body {
 
 .search-box {
     display: flex;
-    gap: 12px;
+    gap: 20px;
     max-width: 600px;
     margin: 0 auto;
 }
@@ -202,10 +216,11 @@ body {
     filter: drop-shadow(0 0 20px rgba(37, 99, 235, 0.3));
 }
 
-#scoreNumber {
+/* 分数显示样式（对应 HTML 中的 scoreDisplay） */
+#scoreDisplay {
     font-size: 2.5rem;
     font-weight: 700;
-    fill: white;
+    color: white;
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
 
@@ -372,29 +387,188 @@ body {
 }
 
 /* ===== 悬浮球 ===== */
-#floatingBall {
+/* 悬浮球卡片 - 与主界面风格统一 */
+.floating-card {
     position: fixed;
-    bottom: 30px;
+    bottom: 100px;
     right: 30px;
-    width: 65px;
-    height: 65px;
-    background: linear-gradient(135deg, #2563eb, #1e40af);
+    width: 300px;
+    background: rgba(20, 25, 45, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 28px;
+    padding: 20px;
+    padding-top: 45px; /* 为关闭按钮预留更多空间 */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    z-index: 100000;
+    display: none;
+    color: #f0f4fa;
+    font-family: 'Inter', sans-serif;
+}
+
+.floating-card input {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 60px;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
     color: white;
+    font-size: 1rem;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    margin-top: 0; /* 由卡片内边距控制 */
+}
+.floating-card input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.floating-card button {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 60px;
+    border: none;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+    transition: all 0.2s;
+    margin-bottom: 15px;
+}
+
+.floating-card button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 25px -5px #2563eb;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.floating-result {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 24px;                  /* 与内部卡片圆角一致 */
+    padding: 16px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    word-break: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.floating-result .score {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.floating-result .risk-level {
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    margin: 5px 0;
+}
+
+.floating-result .reason {
+    color: #a5b4fc;
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+/* 风险等级颜色 */
+.floating-result .high { color: #ef4444; }
+.floating-result .medium { color: #f59e0b; }
+.floating-result .low { color: #4ade80; }
+
+/* 关闭按钮 - 与悬浮球风格呼应 */
+.floating-card .close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;        /* 稍微缩小一点 */
+    height: 28px;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
     border-radius: 50%;
+    color: #94a3b8;
+    font-size: 1.1rem;  /* 字号相应减小 */
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 30px;
-    cursor: pointer;
-    box-shadow: 0 15px 30px rgba(37, 99, 235, 0.5);
-    z-index: 9999;
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s;
+    padding: 0;
+    line-height: 1;
 }
 
-#floatingBall:hover {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 20px 40px #2563eb;
+.floating-card .close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* ===== 风险报告区域样式 ===== */
+#riskReport {
+    background: rgba(25, 30, 45, 0.7);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+#reportContent {
+    font-size: 0.95rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* 下拉列表 */
+#modelSelector {
+    background: rgba(40, 50, 70, 0.7);      /* 更柔和的半透明背景 */
+    backdrop-filter: blur(12px);             /* 毛玻璃效果 */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15); /* 更淡的边框 */
+    border-radius: 40px;                     /* 更圆润的大圆角 */
+    color: #f0f4fa;
+    padding: 8px 24px 8px 18px;              /* 左右内边距调整 */
+    font-size: 0.95rem;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;                /* 平滑过渡 */
+    margin-left: 8px;
+    /* 自定义下拉箭头 */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 14px;
+    padding-right: 40px;                      /* 为箭头留出空间 */
+    /* 添加柔和阴影 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#modelSelector:hover {
+    background: rgba(50, 65, 90, 0.8);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);               /* 轻微上浮 */
+}
+
+#modelSelector:focus {
+    border-color: #3b82f6;                     /* 聚焦时蓝色边框 */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+#modelSelector option {
+    background: #1e293b;                        /* 下拉选项背景 */
+    color: #f0f4fa;
+    padding: 10px;
 }
 
 /* ===== 响应式调整 ===== */
@@ -416,15 +590,432 @@ body {
     .dashboard {
         width: 100%;
     }
-    #riskReport {
-    background: rgba(25, 30, 45, 0.7);
+/* 自定义下拉菜单容器 */
+.custom-select {
+    position: relative;
+    display: inline-block;
+    min-width: 200px;
+    margin-left: 8px;
+}
+
+/* 选中的框（模拟 select 按钮） */
+.select-selected {
+    background: rgba(40, 50, 70, 0.7);
     backdrop-filter: blur(12px);
-    border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-#reportContent {
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 40px;
+    color: #f0f4fa;
+    padding: 8px 24px 8px 18px;
     font-size: 0.95rem;
-    max-height: 300px;
-    overflow-y: auto;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    user-select: none;
+    white-space: nowrap;
+    padding-right: 40px; /* 为箭头留空间 */
 }
+
+/* 自定义箭头（与之前保持一致） */
+.select-selected::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: transform 0.3s;
+}
+
+/* 箭头旋转（展开时） */
+.select-selected.select-arrow-active::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* 选项列表容器 */
+.select-items {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    background: rgba(30, 40, 60, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;      /* 大圆角，圆润柔和 */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    overflow: visible;
+
+    transition: all 0.2s ease;
+}
+
+/* 单个选项 */
+.select-items div {
+    padding: 12px 18px;
+    cursor: pointer;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.select-items div:last-child {
+    border-bottom: none;
+}
+
+.select-items div:hover {
+    background: rgba(59, 130, 246, 0.5);
+}
+
+/* 当前选中项高亮 */
+.select-items div.selected {
+    background: rgba(59, 130, 246, 0.3);
+    color: white;
+    font-weight: 500;
+}
+
+/* 隐藏选项列表 */
+.select-hide {
+    display: none;
+}
+.simple-select {
+    position: relative;
+    display: inline-block;
+    margin-left: 8px;
+}
+.simple-selected {
+    background: rgba(40, 50, 70, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 40px;
+    color: #f0f4fa;
+    padding: 8px 18px;
+    cursor: pointer;
+    padding-right: 40px;
+    /* 加个伪元素箭头 */
+    position: relative;
+}
+.simple-selected::after {
+    content: '▼';
+    position: absolute;
+    right: 15px;
+    color: #cbd5e1;
+    font-size: 12px;
+    transition: transform 0.3s;
+}
+.simple-options {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    background: rgba(30,40,60,0.95);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;  /* 圆角 */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow: visible;
+    z-index: 100;
+}
+.simple-options div {
+    padding: 12px 18px;
+    cursor: pointer;
+    color: #e2e8f0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.2s;
+}
+.simple-options div:last-child {
+    border-bottom: none;
+}
+.simple-options div:hover {
+    background: #2563eb;
+}
+}
+
+.detect-btn {
+    margin-top: 30px;               /* 新增，增大与上方输入区域的间距 */
+    padding: 12px 25px;
+    border-radius: 60px;
+    border: none;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 8px -4px rgba(37, 99, 235, 0.4);
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1.2;
+    outline: none;
+}
+
+/* 文本和图片模式下按钮宽度保持 100%，但内边距已经减小 */
+#text-input-area .detect-btn,
+#image-input-area .detect-btn {
+    width: 100%;
+    /*margin-top: 50px ;*/
+}
+
+/* 模式切换按钮悬停效果 */
+.mode-btn:hover {
+    background: #2563eb;
+    color: white;
+    transform: translateY(-2px);          /* 轻微上浮 */
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+    border-color: #2563eb;                /* 边框颜色同步 */
+    transition: all 0.2s ease;            /* 平滑过渡 */
+}
+
+.detect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px -5px #2563eb;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+/* 按钮样式 */
+.dropdown-button {
+    background: rgba(40, 50, 70, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 40px;
+    color: #f0f4fa;
+    padding: 8px 36px 8px 18px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    position: relative;
+}
+
+.dropdown-button::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: transform 0.3s;
+}
+
+.dropdown-button.active::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* 菜单样式 - 直接放在 body 下，固定定位 */
+.dropdown-menu {
+    position: fixed;            /* 相对于视口 */
+    z-index: 999999;
+    background: rgba(30, 40, 60, 0.95);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: none;              /* 默认隐藏 */
+    white-space: nowrap;        /* 不换行 */
+    overflow: hidden;
+    max-width: none;
+    width: auto;
+    left: 0;                    /* 由 JS 动态设置 */
+    top: 0;
+}
+
+.dropdown-menu li {
+    padding: 12px 18px;
+    cursor: pointer;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.dropdown-menu li:last-child {
+    border-bottom: none;
+}
+
+.dropdown-menu li:hover {
+    background: rgba(59, 130, 246, 0.5);
+}
+
+.dropdown-menu li.selected {
+    background: rgba(59, 130, 246, 0.3);
+    color: white;
+    font-weight: 500;
+}
+.model-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.model-selector-wrapper span {
+    color: #d1d5db;
+    font-size: 0.95rem;
+}
+#floatingBall {
+    position: fixed;      /* 改为 fixed */
+    bottom: 50px;
+    right: 50px;
+    width: 60px;
+    height: 60px;
+    background: #2563eb;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 20001 !important;
+    transition: transform 0.2s;
+}
+#floatingBall:hover {
+    transform: scale(1.1);
+}
+
+/* 清空按钮样式 */
+.clear-input-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    color: #cbd5e1;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.clear-input-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* 清除图片按钮 */
+.clear-image-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: none;
+    border-radius: 40px;
+    color: white;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    outline: none;
+}
+
+.clear-image-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* 覆盖 .search-box 内清除按钮的通用按钮样式 */
+.search-box button.clear-input-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    color: #cbd5e1 !important;
+    font-size: 1.2rem !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    flex-shrink: 0 !important;
+    box-shadow: none !important;        /* 移除渐变按钮的阴影 */
+    transform: none !important;          /* 移除可能的上浮效果 */
+}
+
+.search-box button.clear-input-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+/* 欢迎遮罩层 */
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 15, 30, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.welcome-card {
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    padding: 40px;
+    background: rgba(30, 40, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+}
+
+.welcome-card h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    background: linear-gradient(120deg, #fff, #a5b4fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.welcome-card p {
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.enter-btn {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: none;
+    border-radius: 60px;
+    color: white;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 14px 40px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.5);
+    transition: all 0.2s;
+    border: none;
+    outline: none;
+}
+
+.enter-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px -5px #2563eb;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
 }

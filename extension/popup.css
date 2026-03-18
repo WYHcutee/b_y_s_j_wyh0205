@@ -1,0 +1,132 @@
+/* 悬浮球卡片样式 - 用于 content 和 popup */
+.floating-card {
+  width: 300px;
+  background: rgba(20, 25, 45, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 20px;
+  padding-top: 30px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  color: #f0f4fa;
+  font-family: 'Inter', sans-serif;
+  position: fixed;  /* content 中需要绝对/固定定位，popup 中将被覆盖 */
+  z-index: 100000;
+}
+
+#floating-ball {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: #2563eb;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  z-index: 10000;
+  transition: transform 0.2s;
+}
+
+.floating-card .close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(0,0,0,0.3);
+  border: none;
+  border-radius: 50%;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.floating-card .close-btn:hover {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+.floating-card input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 40px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: white;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+}
+
+.floating-card input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+}
+
+.floating-card button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 40px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 10px 20px -5px rgba(37,99,235,0.4);
+  transition: all 0.2s;
+  margin-bottom: 15px;
+}
+
+.floating-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 25px -5px #2563eb;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.floating-result {
+  background: rgba(0,0,0,0.2);
+  border-radius: 16px;
+  padding: 12px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.floating-result .score {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.floating-result .risk-level {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 5px 0;
+}
+
+.floating-result .reason {
+  color: #a5b4fc;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.floating-result .high { color: #ef4444; }
+.floating-result .medium { color: #f59e0b; }
+.floating-result .low { color: #4ade80; }

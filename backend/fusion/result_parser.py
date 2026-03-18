@@ -1,4 +1,4 @@
-import re
+'''import re
 
 
 def parse_model_output(text):
@@ -13,6 +13,26 @@ def parse_model_output(text):
     text_score = int(text_score_match.group(1)) if text_score_match else 50
     image_score = int(image_score_match.group(1)) if image_score_match else 50
     # 如果找不到 Reason，返回一个默认提示
+    reason = reason_match.group(1).strip() if reason_match else "模型未提供详细分析理由。"
+
+    return url_score, text_score, image_score, reason'''
+import re
+
+def parse_model_output(text):
+    # 检查是否是被安全拦截的标记
+    if text.startswith("SECURITY_BLOCK:"):
+        reason = text.replace("SECURITY_BLOCK:", "").strip()
+        return 0, 0, 0, reason
+
+    # 原有的解析逻辑
+    url_score_match = re.search(r"URL_Score:\s*(\d+)", text)
+    text_score_match = re.search(r"Text_Score:\s*(\d+)", text)
+    image_score_match = re.search(r"Image_Score:\s*(\d+)", text)
+    reason_match = re.search(r"Reason:\s*([\s\S]*)", text)
+
+    url_score = int(url_score_match.group(1)) if url_score_match else 50
+    text_score = int(text_score_match.group(1)) if text_score_match else 50
+    image_score = int(image_score_match.group(1)) if image_score_match else 50
     reason = reason_match.group(1).strip() if reason_match else "模型未提供详细分析理由。"
 
     return url_score, text_score, image_score, reason
