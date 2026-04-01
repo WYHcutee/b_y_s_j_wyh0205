@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>模型能力对比测试</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: #e5e7eb;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #a5b4fc;
+            font-size: 2rem;
+        }
+        h2 {
+            color: #10b981;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .card {
+            background: rgba(30, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+        .tab.active {
+            background: #10b981;
+            border-color: #10b981;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 40, 60, 0.9);
+            color: white;
+            font-size: 1rem;
+        }
+        select option {
+            background: #1e293b;
+            color: white;
+            padding: 10px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 12px 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 15px 0;
+            display: none;
+        }
+        .progress-bar .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .status.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .status.info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+        .test-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid #3b82f6;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        .test-item.correct {
+            border-left-color: #10b981;
+        }
+        .test-item.incorrect {
+            border-left-color: #ef4444;
+        }
+        .test-item .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .test-item .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        .badge-url { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .badge-text { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .badge-image { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .badge-correct { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .badge-incorrect { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .analysis-card h3 {
+            color: #a5b4fc;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .metric:last-child {
+            border-bottom: none;
+        }
+        .metric-label {
+            color: #94a3b8;
+        }
+        .metric-value {
+            font-weight: 600;
+        }
+        .metric-value.good {
+            color: #10b981;
+        }
+        .metric-value.warning {
+            color: #f59e0b;
+        }
+        .metric-value.bad {
+            color: #ef4444;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        th {
+            background: rgba(59, 130, 246, 0.2);
+            color: #a5b4fc;
+        }
+        .model-name {
+            text-align: left;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/?skip_welcome=1" class="back-link"><i class="fas fa-arrow-left"></i> 返回检测页面</a>
+        <h1><i class="fas fa-flask"></i> 模型能力对比测试</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('run')">运行测试</div>
+            <div class="tab" onclick="switchTab('results')">测试结果</div>
+            <div class="tab" onclick="switchTab('analysis')">对比分析</div>
+        </div>
+        
+        <!-- 运行测试 -->
+        <div id="run-tab" class="tab-content active">
+            <div class="card">
+                <h2><i class="fas fa-play-circle"></i> 配置测试</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>选择模型</label>
+                        <select id="modelSelect">
+                            <option value="all">全部模型</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>选择模态</label>
+                        <select id="modalitySelect">
+                            <option value="all">全部模态</option>
+                            <option value="url">URL检测</option>
+                            <option value="text">文本检测</option>
+                            <option value="image">图片检测</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="runTests()" id="runBtn">
+                    <i class="fas fa-play"></i> 开始测试
+                </button>
+                <button class="btn btn-secondary" onclick="runQuickTest()">
+                    <i class="fas fa-bolt"></i> 快速测试（每个模态2个样本）
+                </button>
+                
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <div id="runStatus" class="status info" style="display:none;"></div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-list"></i> 测试数据集预览</h2>
+                <div id="datasetPreview"></div>
+            </div>
+        </div>
+        
+        <!-- 测试结果 -->
+        <div id="results-tab" class="tab-content">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin:0;"><i class="fas fa-clipboard-list"></i> 测试结果列表</h2>
+                    <button class="btn btn-danger" onclick="clearResults()">
+                        <i class="fas fa-trash"></i> 清除结果
+                    </button>
+                </div>
+                <div id="resultsList"></div>
+            </div>
+        </div>
+        
+        <!-- 对比分析 -->
+        <div id="analysis-tab" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-chart-bar"></i> 模型能力对比分析</h2>
+                <div id="analysisContent">
+                    <p style="text-align: center; color: #94a3b8;">请先运行测试获取数据</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> 可视化图表</h2>
+                <div class="chart-container">
+                    <canvas id="accuracyChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-clock"></i> 响应时间对比</h2>
+                <div class="chart-container">
+                    <canvas id="timeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let models = [];
+        let testDataset = {};
+        let accuracyChart = null;
+        let timeChart = null;
+        
+        window.onload = function() {
+            loadModels();
+            loadDataset();
+            loadResults();
+        };
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            if (tabName === 'results') {
+                loadResults();
+            } else if (tabName === 'analysis') {
+                loadAnalysis();
+            }
+        }
+        
+        async function loadModels() {
+            try {
+                const response = await fetch('/models');
+                const data = await response.json();
+                models = data.models;
+                
+                const select = document.getElementById('modelSelect');
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.id;
+                    option.textContent = model.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载模型列表失败:', error);
+            }
+        }
+        
+        async function loadDataset() {
+            try {
+                const response = await fetch('/test/dataset');
+                testDataset = await response.json();
+                
+                let html = '';
+                ['url', 'text', 'image'].forEach(modality => {
+                    const items = testDataset[modality] || [];
+                    const modalityName = {url: 'URL检测', text: '文本检测', image: '图片检测'}[modality];
+                    html += `<h3 style="margin-top: 20px; color: #a5b4fc;"><i class="fas fa-${modality === 'url' ? 'link' : modality === 'text' ? 'file-alt' : 'image'}"></i> ${modalityName} (${items.length}个样本)</h3>`;
+                    
+                    items.forEach(item => {
+                        const badgeClass = item.expected === 'safe' ? 'badge-correct' : 'badge-incorrect';
+                        const expectedText = item.expected === 'safe' ? '正常' : '恶意';
+                        html += `
+                            <div class="test-item">
+                                <div class="header">
+                                    <span style="color: #94a3b8;">${item.id}</span>
+                                    <span class="badge ${badgeClass}">${expectedText}</span>
+                                </div>
+                                <div style="margin-bottom: 8px;"><strong>描述:</strong> ${item.description}</div>
+                                <div style="color: #64748b; font-size: 0.9rem;">${item.input.substring(0, 100)}${item.input.length > 100 ? '...' : ''}</div>
+                            </div>
+                        `;
+                    });
+                });
+                
+                document.getElementById('datasetPreview').innerHTML = html;
+            } catch (error) {
+                console.error('加载数据集失败:', error);
+            }
+        }
+        
+        async function fetchPublicDatasets() {
+            const statusDiv = document.getElementById('fetchStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<div class="status info"><i class="fas fa-spinner fa-spin"></i> 正在从公开数据源获取数据...</div>';
+            
+            try {
+                const response = await fetch('/test/public/fetch-all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        max_count_per_source: 20,
+                        auto_add: true
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.added_to_dataset > 0) {
+                    statusDiv.innerHTML = `<div class="status success"><i class="fas fa-check-circle"></i> 成功获取并添加 ${data.added_to_dataset} 条公开数据集URL！</div>`;
+                    
+                    await loadDataset();
+                } else {
+                    statusDiv.innerHTML = '<div class="status error"><i class="fas fa-exclamation-circle"></i> 获取数据失败，请检查网络连接</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error"><i class="fas fa-exclamation-circle"></i> 错误: ${error.message}</div>`;
+            }
+        }
+        
+        async function loadResults() {
+            try {
+                const response = await fetch('/test/results');
+                const results = await response.json();
+                
+                if (results.length === 0) {
+                    document.getElementById('resultsList').innerHTML = '<p style="text-align: center; color: #94a3b8;">暂无测试结果</p>';
+                    return;
+                }
+                
+                let html = `<p style="margin-bottom: 15px;">共 ${results.length} 条测试记录</p>`;
+                results.reverse().forEach(item => {
+                    const correctClass = item.is_correct ? 'correct' : 'incorrect';
+                    const modalityBadge = {
+                        url: 'badge-url',
+                        text: 'badge-text',
+                        image: 'badge-image'
+                    }[item.modality];
+                    const modalityName = {url: 'URL', text: '文本', image: '图片'}[item.modality];
+                    const resultBadge = item.is_correct ? 'badge-correct' : 'badge-incorrect';
+                    const resultText = item.is_correct ? '正确' : '错误';
+                    
+                    const modelName = models.find(m => m.id === item.model)?.name || item.model;
+                    
+                    html += `
+                        <div class="test-item ${correctClass}">
+                            <div class="header">
+                                <span>
+                                    <span class="badge ${modalityBadge}">${modalityName}</span>
+                                    <span class="badge ${resultBadge}">${resultText}</span>
+                                </span>
+                                <span style="color: #94a3b8;">${item.elapsed_time}s</span>
+                            </div>
+                            <div><strong>模型:</strong> ${modelName}</div>
+                            <div><strong>描述:</strong> ${item.description}</div>
+                            <div><strong>预期:</strong> ${item.expected === 'safe' ? '正常' : '恶意'} | <strong>预测:</strong> ${item.predicted === 'safe' ? '正常' : '恶意'}</div>
+                            <div><strong>分数:</strong> URL: ${item.url_score || 0} | 文本: ${item.text_score || 0} | 图片: ${item.image_score || 0} | 总分: ${item.final_score}</div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('resultsList').innerHTML = html;
+            } catch (error) {
+                console.error('加载结果失败:', error);
+            }
+        }
+        
+        async function loadAnalysis() {
+            try {
+                const response = await fetch('/test/analysis');
+                const data = await response.json();
+                
+                if (!data.models || data.models.length === 0) {
+                    document.getElementById('analysisContent').innerHTML = '<p style="text-align: center; color: #94a3b8;">请先运行测试获取数据</p>';
+                    return;
+                }
+                
+                let html = `
+                    <p style="margin-bottom: 20px;">共测试 ${data.total_tests} 次，涉及 ${data.models.length} 个模型</p>
+                    
+                    <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>模型</th>
+                                <th colspan="5">URL检测</th>
+                                <th colspan="5">文本检测</th>
+                                <th colspan="5">图片检测</th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th>准确率</th>
+                                <th>精确率</th>
+                                <th>召回率</th>
+                                <th>F1</th>
+                                <th>耗时</th>
+                                <th>准确率</th>
+                                <th>精确率</th>
+                                <th>召回率</th>
+                                <th>F1</th>
+                                <th>耗时</th>
+                                <th>准确率</th>
+                                <th>精确率</th>
+                                <th>召回率</th>
+                                <th>F1</th>
+                                <th>耗时</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.models.forEach(modelId => {
+                    const modelName = models.find(m => m.id === modelId)?.name || modelId;
+                    const analysis = data.analysis[modelId];
+                    
+                    html += `<tr><td class="model-name">${modelName}</td>`;
+                    
+                    ['url', 'text', 'image'].forEach(modality => {
+                        const m = analysis[modality];
+                        if (m.total > 0) {
+                            const accClass = m.accuracy >= 80 ? 'good' : m.accuracy >= 50 ? 'warning' : 'bad';
+                            const preClass = m.precision >= 80 ? 'good' : m.precision >= 50 ? 'warning' : 'bad';
+                            const recClass = m.recall >= 80 ? 'good' : m.recall >= 50 ? 'warning' : 'bad';
+                            const f1Class = m.f1 >= 80 ? 'good' : m.f1 >= 50 ? 'warning' : 'bad';
+                            html += `
+                                <td><span class="metric-value ${accClass}">${m.accuracy}%</span></td>
+                                <td><span class="metric-value ${preClass}">${m.precision}%</span></td>
+                                <td><span class="metric-value ${recClass}">${m.recall}%</span></td>
+                                <td><span class="metric-value ${f1Class}">${m.f1}%</span></td>
+                                <td>${m.avg_time}s</td>
+                            `;
+                        } else {
+                            html += '<td colspan="5" style="color: #64748b;">-</td>';
+                        }
+                    });
+                    
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('analysisContent').innerHTML = html;
+                
+                updateCharts(data);
+            } catch (error) {
+                console.error('加载分析失败:', error);
+            }
+        }
+        
+        function updateCharts(data) {
+            const modelNames = data.models.map(id => models.find(m => m.id === id)?.name || id);
+            
+            const urlAccuracy = data.models.map(id => data.analysis[id].url.accuracy || 0);
+            const textAccuracy = data.models.map(id => data.analysis[id].text.accuracy || 0);
+            const imageAccuracy = data.models.map(id => data.analysis[id].image.accuracy || 0);
+            
+            if (accuracyChart) accuracyChart.destroy();
+            accuracyChart = new Chart(document.getElementById('accuracyChart'), {
+                type: 'bar',
+                data: {
+                    labels: modelNames,
+                    datasets: [
+                        {
+                            label: 'URL检测准确率',
+                            data: urlAccuracy,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '文本检测准确率',
+                            data: textAccuracy,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '图片检测准确率',
+                            data: imageAccuracy,
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                            borderColor: 'rgba(245, 158, 11, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e5e7eb' }
+                        }
+                    }
+                }
+            });
+            
+            const urlTime = data.models.map(id => data.analysis[id].url.avg_time || 0);
+            const textTime = data.models.map(id => data.analysis[id].text.avg_time || 0);
+            const imageTime = data.models.map(id => data.analysis[id].image.avg_time || 0);
+            
+            if (timeChart) timeChart.destroy();
+            timeChart = new Chart(document.getElementById('timeChart'), {
+                type: 'bar',
+                data: {
+                    labels: modelNames,
+                    datasets: [
+                        {
+                            label: 'URL检测耗时(秒)',
+                            data: urlTime,
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)'
+                        },
+                        {
+                            label: '文本检测耗时(秒)',
+                            data: textTime,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)'
+                        },
+                        {
+                            label: '图片检测耗时(秒)',
+                            data: imageTime,
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e5e7eb' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        async function runTests() {
+            const modelId = document.getElementById('modelSelect').value;
+            const modality = document.getElementById('modalitySelect').value;
+            
+            const modelsToTest = modelId === 'all' ? models.map(m => m.id) : [modelId];
+            const modalitiesToTest = modality === 'all' ? ['url', 'text', 'image'] : [modality];
+            
+            let totalTests = 0;
+            modelsToTest.forEach(m => {
+                modalitiesToTest.forEach(mod => {
+                    totalTests += (testDataset[mod] || []).length;
+                });
+            });
+            
+            if (totalTests === 0) {
+                alert('没有可测试的数据');
+                return;
+            }
+            
+            const runBtn = document.getElementById('runBtn');
+            runBtn.disabled = true;
+            
+            const progressBar = document.getElementById('progressBar');
+            const progress = document.getElementById('progress');
+            const status = document.getElementById('runStatus');
+            
+            progressBar.style.display = 'block';
+            status.style.display = 'block';
+            status.className = 'status info';
+            
+            let completed = 0;
+            let successCount = 0;
+            let errorCount = 0;
+            
+            for (const model of modelsToTest) {
+                for (const mod of modalitiesToTest) {
+                    const items = testDataset[mod] || [];
+                    for (const item of items) {
+                        try {
+                            status.innerHTML = `正在测试: ${models.find(m => m.id === model)?.name} - ${mod} - ${item.id}`;
+                            
+                            const response = await fetch('/test/run', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    model: model,
+                                    modality: mod,
+                                    test_item: item
+                                })
+                            });
+                            
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                successCount++;
+                            } else {
+                                errorCount++;
+                            }
+                        } catch (error) {
+                            errorCount++;
+                        }
+                        
+                        completed++;
+                        progress.style.width = `${(completed / totalTests) * 100}%`;
+                    }
+                }
+            }
+            
+            status.className = 'status success';
+            status.innerHTML = `测试完成！成功: ${successCount}, 失败: ${errorCount}`;
+            runBtn.disabled = false;
+            
+            setTimeout(() => {
+                progressBar.style.display = 'none';
+            }, 2000);
+        }
+        
+        async function runQuickTest() {
+            document.getElementById('modelSelect').value = 'all';
+            document.getElementById('modalitySelect').value = 'all';
+            
+            const quickDataset = {
+                url: testDataset.url.slice(0, 2),
+                text: testDataset.text.slice(0, 2),
+                image: testDataset.image.slice(0, 2)
+            };
+            
+            const originalDataset = testDataset;
+            testDataset = quickDataset;
+            
+            await runTests();
+            
+            testDataset = originalDataset;
+        }
+        
+        async function clearResults() {
+            if (!confirm('确定要清除所有测试结果吗？')) return;
+            
+            try {
+                await fetch('/test/results/clear', { method: 'POST' });
+                loadResults();
+                loadAnalysis();
+            } catch (error) {
+                console.error('清除失败:', error);
+            }
+        }
+    </script>
+</body>
+</html>

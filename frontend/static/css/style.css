@@ -286,10 +286,12 @@ body {
     letter-spacing: 1px;
 }
 
-/* 风险等级颜色类（备用） */
-.low { color: #4ade80; }
-.medium { color: #facc15; }
-.high { color: #f87171; }
+/* 风险等级颜色类 */
+.danger { color: #dc2626; }
+.high { color: #ef4444; }
+.medium { color: #f59e0b; }
+.low { color: #84cc16; }
+.safe { color: #22c55e; }
 
 /* ===== 详细解释按钮 ===== */
 .explain-btn {
@@ -483,9 +485,11 @@ body {
 }
 
 /* 风险等级颜色 */
+.floating-result .danger { color: #dc2626; }
 .floating-result .high { color: #ef4444; }
 .floating-result .medium { color: #f59e0b; }
-.floating-result .low { color: #4ade80; }
+.floating-result .low { color: #84cc16; }
+.floating-result .safe { color: #22c55e; }
 
 /* 关闭按钮 - 与悬浮球风格呼应 */
 .floating-card .close-btn {

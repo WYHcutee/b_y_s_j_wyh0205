@@ -10,6 +10,7 @@ panel.id = 'floatingPanel';
 panel.innerHTML = `
     <input type="text" id="floatingUrlInput" placeholder="请输入需要检测的网址">
     <button id="floatingDetectBtn">开始检测</button>
+    <button id="floatingScanBtn">扫描当前页面</button>
 `;
 document.body.appendChild(panel);
 
@@ -48,4 +49,28 @@ document.getElementById('floatingDetectBtn').addEventListener('click', () => {
     } else {
         console.log("detect() 函数未定义");
     }
+});
+
+// 扫描当前页面
+document.getElementById('floatingScanBtn').addEventListener('click', () => {
+    // 获取当前页面文本
+    const pageText = document.body.innerText;
+    
+    // 对当前页面进行截图
+    html2canvas(document.body).then(canvas => {
+        canvas.toBlob(blob => {
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                const base64data = reader.result;
+                
+                // 发送到后端进行检测
+                if (typeof detectCurrentPage === 'function') {
+                    detectCurrentPage(pageText, base64data);
+                } else {
+                    console.log("detectCurrentPage() 函数未定义");
+                }
+            };
+            reader.readAsDataURL(blob);
+        });
+    });
 });

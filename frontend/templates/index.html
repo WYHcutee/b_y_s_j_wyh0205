@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         /* 悬浮球样式 */
         #floatingBall {
@@ -15,7 +16,7 @@
             right: 50px;
             width: 60px;
             height: 60px;
-            background: #2563eb;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: white;
             border-radius: 50%;
             display: flex;
@@ -23,12 +24,61 @@
             justify-content: center;
             font-size: 28px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
             z-index: 9999;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
         }
         #floatingBall:hover {
             transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.6);
+        }
+        #floatingBall:active {
+            transform: scale(0.95);
+        }
+        
+        /* 悬浮球面板样式 */
+        #floatingPanel {
+            position: absolute;
+            bottom: 120px;
+            right: 50px;
+            width: 300px;
+            background: rgba(30, 40, 60, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+            display: none;
+        }
+        #floatingPanel input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            margin-bottom: 10px;
+        }
+        #floatingPanel button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background 0.2s;
+        }
+        #floatingPanel button:hover {
+            background: #1d4ed8;
+        }
+        #floatingScanBtn {
+            background: #10b981 !important;
+        }
+        #floatingScanBtn:hover {
+            background: #059669 !important;
         }
         /* 离线状态颜色 */
         .offline {
@@ -56,6 +106,69 @@
             background: #2563eb;
             color: white;
             border-color: #2563eb;
+        }
+        .rag-tab.active {
+            background: #10b981 !important;
+            border-color: #10b981 !important;
+        }
+        .history-filter.active {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+        }
+        #historyTable {
+            background: rgba(30, 40, 60, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            table-layout: fixed;
+        }
+        #historyTable th {
+            background: rgba(59, 130, 246, 0.2);
+            padding: 15px 10px;
+            text-align: center;
+            color: #a5b4fc;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+        }
+        #historyTable td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+        }
+        #historyTable tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        #historyTable tbody tr td:nth-child(1),
+        #historyTable thead tr th:nth-child(1) {
+            width: 10%;
+            text-align: center;
+        }
+        #historyTable tbody tr td:nth-child(2),
+        #historyTable thead tr th:nth-child(2) {
+            width: 40%;
+            text-align: left;
+            padding-left: 15px;
+            max-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #historyTable tbody tr td:nth-child(3),
+        #historyTable thead tr th:nth-child(3) {
+            width: 10%;
+            text-align: center;
+            font-weight: bold;
+        }
+        #historyTable tbody tr td:nth-child(4),
+        #historyTable thead tr th:nth-child(4) {
+            width: 15%;
+            text-align: center;
+        }
+        #historyTable tbody tr td:nth-child(5),
+        #historyTable thead tr th:nth-child(5) {
+            width: 25%;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
         }
         /* 图片上传区域 */
         .image-upload-area {
@@ -179,6 +292,7 @@
             <li onclick="showPage('home')" class="active">首页检测</li>
             <li onclick="showPage('history')">检测记录</li>
             <li onclick="showPage('experiment')">实验评估</li>
+            <li onclick="showPage('rag')">知识库管理</li>
             <li onclick="showPage('about')">系统说明</li>
         </ul>
     </aside>
@@ -204,6 +318,7 @@
                     <span class="mode-btn active" data-mode="url" onclick="switchMode('url')">URL</span>
                     <span class="mode-btn" data-mode="text" onclick="switchMode('text')">文本</span>
                     <span class="mode-btn" data-mode="image" onclick="switchMode('image')">图片</span>
+                    <span class="mode-btn" data-mode="batch" onclick="switchMode('batch')">批量</span>
                 </div>
                 <!-- URL 输入区域（默认显示） -->
 <div id="url-input-area" class="search-box" style="display: flex; align-items: center;">
@@ -228,10 +343,22 @@
     <img id="imagePreview" class="image-preview" alt="预览">
     <button class="clear-image-btn" style="margin-top: 10px; display: none;">清除图片</button>
 </div>
+                <!-- 批量检测区域 -->
+                <div id="batch-input-area" style="display: none;">
+                    <textarea id="batchUrlsInput" placeholder="请输入多个URL，每行一个&#10;例如：&#10;https://www.example1.com&#10;https://www.example2.com&#10;https://www.example3.com" style="width: 100%; height: 150px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; font-size: 14px; resize: vertical; box-sizing: border-box;"></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <span style="font-size: 12px; color: #94a3b8;">最多支持10个URL同时检测</span>
+                        <span id="urlCount" style="font-size: 12px; color: #3b82f6;">已输入: 0 个URL</span>
+                    </div>
+                </div>
                 <button onclick="detect()" class="detect-btn">开始检测</button>
             </div>
             <div id="loading" class="loading" style="display:none;">模型推理中...</div>
             <div id="resultSection" style="display:none;">
+                <!-- 批量检测结果区域 -->
+                <div id="batchResults" style="display: none; margin-bottom: 20px;"></div>
+                <!-- 单个检测结果 -->
+                <div id="singleResultSection">
                 <!-- 仪表盘（使用 SVG 圆环） -->
                 <div class="dashboard glass">
                     <div class="gauge-container" style="position: relative; width: 200px; height: 200px; margin: 0 auto;">
@@ -242,6 +369,7 @@
                         <div id="scoreDisplay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 32px; font-weight: bold; color: white; text-shadow: 0 0 10px rgba(0,0,0,0.5);">0</div>
                     </div>
                     <div id="riskLevel" class="risk-text"></div>
+                    <div id="timeDisplay" style="text-align: center; color: #94a3b8; font-size: 14px; margin-top: 5px; display: none;"></div>
                 </div>
                 <!-- 三模态卡片 -->
                 <div class="cards">
@@ -263,30 +391,196 @@
                     <h3 style="margin-top: 0; color: #a5b4fc;">详细风险报告</h3>
                     <div id="reportContent" style="line-height: 1.6; color: #e5e7eb; white-space: pre-wrap;"></div>
                 </div>
+                <!-- RAG 知识库引用 -->
+                <div id="ragKnowledge" class="glass" style="margin-top: 20px; padding: 20px;">
+                    <h3 style="margin-top: 0; color: #10b981;">
+                        <i class="fas fa-book" style="margin-right: 8px;"></i>RAG 知识库引用
+                        <span id="ragStatusBadge" style="font-size: 12px; padding: 2px 8px; border-radius: 10px; margin-left: 10px;"></span>
+                    </h3>
+                    <div id="ragContent" style="line-height: 1.6; color: #e5e7eb; max-height: 300px; overflow-y: auto;">
+                        <div style="padding: 10px; text-align: center; color: #94a3b8;">检测后将显示知识库引用内容</div>
+                    </div>
+                </div>
+                <!-- 检查过的 URL 列表 -->
+                <div id="checkedUrls" class="glass" style="margin-top: 20px; padding: 20px;">
+                    <h3 style="margin-top: 0; color: #a5b4fc;">检查过的 URL</h3>
+                    <div id="urlList" style="line-height: 1.6; color: #e5e7eb; max-height: 200px; overflow-y: auto;">
+                        <div style="padding: 10px; text-align: center; color: #94a3b8;">检测后将显示检查过的 URL 列表</div>
+                    </div>
+                </div>
+                <!-- 网页内容预览 -->
+                <div id="pagePreview" class="glass" style="margin-top: 20px; padding: 20px; display: none;">
+                    <h3 style="margin-top: 0; color: #a5b4fc;">网页内容预览</h3>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 300px;">
+                            <h4 style="color: #94a3b8; margin-bottom: 10px;">网页文本</h4>
+                            <div id="pageTextPreview" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; color: #e5e7eb; font-size: 14px; line-height: 1.6; white-space: pre-wrap;"></div>
+                        </div>
+                        <div style="flex: 1; min-width: 300px;">
+                            <h4 style="color: #94a3b8; margin-bottom: 10px;">网页截图</h4>
+                            <div id="pageImagePreview" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; text-align: center;">
+                                <div style="color: #94a3b8;">暂无截图</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="pageImagesSection" style="margin-top: 20px; display: none;">
+                        <h4 style="color: #94a3b8; margin-bottom: 10px;">网页内图片</h4>
+                        <div id="pageImagesPreview" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                    </div>
+                </div>
                 <!-- 雷达图 -->
                 <div class="chart-container">
                     <canvas id="radarChart"></canvas>
+                </div>
                 </div>
             </div>
         </div>
 
         <!-- 其他页面保持不变 -->
         <div id="history" class="page" style="display:none;">
-            <h2>检测历史</h2>
-            <table id="historyTable" border="1" cellpadding="5" style="width:100%; border-collapse: collapse;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">检测历史</h2>
+                <button onclick="clearHistory()" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="fas fa-trash" style="margin-right: 5px;"></i>清除历史
+                </button>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div class="history-filter active" onclick="filterHistory('all')" data-filter="all" style="padding: 10px 20px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <i class="fas fa-list" style="margin-right: 5px;"></i>全部
+                </div>
+                <div class="history-filter" onclick="filterHistory('url')" data-filter="url" style="padding: 10px 20px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <i class="fas fa-link" style="margin-right: 5px;"></i>URL检测
+                </div>
+                <div class="history-filter" onclick="filterHistory('text')" data-filter="text" style="padding: 10px 20px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <i class="fas fa-file-alt" style="margin-right: 5px;"></i>文本检测
+                </div>
+                <div class="history-filter" onclick="filterHistory('image')" data-filter="image" style="padding: 10px 20px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <i class="fas fa-image" style="margin-right: 5px;"></i>图片检测
+                </div>
+            </div>
+            <table id="historyTable" cellpadding="0" cellspacing="0" style="width:100%; border-collapse: collapse; border: none;">
                 <thead>
-                    <tr><th>URL</th><th>得分</th><th>等级</th><th>时间</th></tr>
+                    <tr>
+                        <th>类型</th>
+                        <th>内容</th>
+                        <th>分数</th>
+                        <th>等级</th>
+                        <th>时间</th>
+                    </tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
         <div id="experiment" class="page" style="display:none;">
-            <h2>实验评估对比</h2>
-            <canvas id="experimentChart"></canvas>
+            <h2><i class="fas fa-flask" style="margin-right: 10px;"></i>实验评估对比</h2>
+            <p style="margin-bottom: 20px; color: #94a3b8;">测试不同大模型在URL、文本、图片三种模态上的检测能力，生成对比分析报告。</p>
+            
+            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 15px; padding: 30px; text-align: center; margin-bottom: 20px;">
+                <i class="fas fa-chart-bar" style="font-size: 3rem; color: #3b82f6; margin-bottom: 20px;"></i>
+                <h3 style="color: #e5e7eb; margin-bottom: 15px;">模型能力对比测试系统</h3>
+                <p style="color: #94a3b8; margin-bottom: 20px;">支持批量测试多个模型，自动生成准确率、响应时间等对比分析</p>
+                <a href="/test" style="display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 15px 40px; border-radius: 10px; text-decoration: none; font-size: 1.1rem;">
+                    <i class="fas fa-play-circle" style="margin-right: 8px;"></i>进入测试系统
+                </a>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px;">
+                    <i class="fas fa-link" style="color: #3b82f6; font-size: 1.5rem; margin-bottom: 10px;"></i>
+                    <h4 style="color: #e5e7eb;">URL检测能力</h4>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">测试模型对URL结构的分析能力</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px;">
+                    <i class="fas fa-file-alt" style="color: #10b981; font-size: 1.5rem; margin-bottom: 10px;"></i>
+                    <h4 style="color: #e5e7eb;">文本检测能力</h4>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">测试模型对文本内容的理解能力</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 20px;">
+                    <i class="fas fa-image" style="color: #f59e0b; font-size: 1.5rem; margin-bottom: 10px;"></i>
+                    <h4 style="color: #e5e7eb;">图片检测能力</h4>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">测试模型对网页截图的识别能力</p>
+                </div>
+            </div>
+            
+            <canvas id="experimentChart" style="margin-top: 30px;"></canvas>
         </div>
         <div id="about" class="page" style="display:none;">
             <h2>系统说明</h2>
             <p>基于多模态大模型的恶意网站检测系统，支持URL、文本、图片三种输入方式。</p>
+        </div>
+        
+        <!-- 知识库管理页面 -->
+        <div id="rag" class="page" style="display:none;">
+            <div class="glass" style="padding: 20px; margin-bottom: 20px;">
+                <h2 style="margin-top: 0; color: #10b981;"><i class="fas fa-book" style="margin-right: 10px;"></i>RAG 知识库管理</h2>
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                    <i class="fas fa-folder-open" style="color: #f59e0b; margin-right: 8px;"></i>
+                    知识库路径：<code id="knowledgeBasePath" style="background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 5px; color: #10b981;">加载中...</code>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <div class="rag-tab active" onclick="switchRagTab('add')" style="padding: 10px 20px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">添加知识</div>
+                    <div class="rag-tab" onclick="switchRagTab('view')" style="padding: 10px 20px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">查看知识库</div>
+                    <div class="rag-tab" onclick="switchRagTab('init')" style="padding: 10px 20px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">初始化知识库</div>
+                    <div class="rag-tab" onclick="switchRagTab('test')" style="padding: 10px 20px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">测试检索</div>
+                </div>
+                
+                <!-- 添加知识 -->
+                <div id="rag-add-tab" class="rag-tab-content">
+                    <div class="glass" style="padding: 20px; margin-bottom: 20px;">
+                        <h3 style="color: #10b981; margin-bottom: 15px;"><i class="fas fa-plus-circle" style="margin-right: 8px;"></i>添加新知识</h3>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; color: #94a3b8;">知识来源（可选）</label>
+                            <input type="text" id="ragSourceInput" placeholder="例如：网络安全白皮书" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; color: #94a3b8;">知识内容</label>
+                            <textarea id="ragContentInput" placeholder="请输入网络安全相关的知识内容" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; min-height: 150px;"></textarea>
+                        </div>
+                        <button onclick="addRagKnowledge()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 10px; color: white; padding: 12px 30px; cursor: pointer;">
+                            <i class="fas fa-save"></i> 添加到知识库
+                        </button>
+                        <div id="ragAddStatus" style="margin-top: 10px; padding: 10px; border-radius: 8px; display: none;"></div>
+                    </div>
+                </div>
+                
+                <!-- 查看知识库 -->
+                <div id="rag-view-tab" class="rag-tab-content" style="display: none;">
+                    <div class="glass" style="padding: 20px;">
+                        <h3 style="color: #10b981; margin-bottom: 15px;"><i class="fas fa-list" style="margin-right: 8px;"></i>知识库文档列表</h3>
+                        <div id="ragKnowledgeList" style="max-height: 400px; overflow-y: auto;">
+                            <p style="text-align: center; color: #94a3b8;">点击"查看知识库"加载</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 初始化知识库 -->
+                <div id="rag-init-tab" class="rag-tab-content" style="display: none;">
+                    <div class="glass" style="padding: 20px;">
+                        <h3 style="color: #10b981; margin-bottom: 15px;"><i class="fas fa-database" style="margin-right: 8px;"></i>初始化知识库</h3>
+                        <p style="color: #94a3b8; margin-bottom: 20px;">点击下方按钮，将 knowledge_base/documents/ 目录下的所有 .txt 文件加载到向量数据库中。</p>
+                        <button onclick="initRagKnowledgeBase()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 10px; color: white; padding: 12px 30px; cursor: pointer;">
+                            <i class="fas fa-sync"></i> 初始化知识库
+                        </button>
+                        <div id="ragInitStatus" style="margin-top: 10px; padding: 10px; border-radius: 8px; display: none;"></div>
+                    </div>
+                </div>
+                
+                <!-- 测试检索 -->
+                <div id="rag-test-tab" class="rag-tab-content" style="display: none;">
+                    <div class="glass" style="padding: 20px;">
+                        <h3 style="color: #10b981; margin-bottom: 15px;"><i class="fas fa-search" style="margin-right: 8px;"></i>测试知识检索</h3>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; color: #94a3b8;">输入查询内容</label>
+                            <input type="text" id="ragQueryInput" placeholder="例如：如何识别钓鱼网站？" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white;">
+                        </div>
+                        <button onclick="testRagRetrieve()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 10px; color: white; padding: 12px 30px; cursor: pointer;">
+                            <i class="fas fa-search"></i> 检索相关知识
+                        </button>
+                        <div id="ragRetrieveResult" style="margin-top: 20px;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -347,9 +641,12 @@
     }
 
     // 欢迎遮罩层点击进入按钮事件
-    document.getElementById('enter-system-btn').addEventListener('click', function() {
-        document.getElementById('welcome-overlay').style.display = 'none';
-    });
+    var enterBtn = document.getElementById('enter-system-btn');
+    if (enterBtn) {
+        enterBtn.addEventListener('click', function() {
+            document.getElementById('welcome-overlay').style.display = 'none';
+        });
+    }
 </script>
 </body>
 </html>

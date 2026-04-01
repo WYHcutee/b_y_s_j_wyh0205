@@ -1,14 +1,16 @@
 {
   "manifest_version": 3,
   "name": "恶意网站快速检测",
-  "version": "1.0",
-  "description": "点击悬浮球，快速检测当前网站的安全性。",
+  "version": "2.2",
+  "description": "点击悬浮球，快速检测当前网站的安全性。支持扫描当前页面。",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "scripting",
+    "tabs"
   ],
   "host_permissions": [
-    "http://127.0.0.1:5000/*"
+    "<all_urls>"
   ],
   "background": {
     "service_worker": "background.js"
@@ -33,5 +35,11 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
